@@ -1,3 +1,9 @@
 *.py
 *.pyc
 CMakeLists.txt.user
+build
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes

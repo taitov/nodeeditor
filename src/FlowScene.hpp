@@ -11,6 +11,7 @@
 #include "Connection.hpp"
 #include "Export.hpp"
 #include "DataModelRegistry.hpp"
+#include "Node.hpp"
 
 namespace QtNodes
 {
@@ -42,7 +43,8 @@ public:
                    PortIndex portIndex);
 
   std::shared_ptr<Connection>
-  createConnection(Node& nodeIn,
+  createConnection(QUuid connectionId,
+                   Node& nodeIn,
                    PortIndex portIndexIn,
                    Node& nodeOut,
                    PortIndex portIndexOut);
@@ -53,7 +55,7 @@ public:
   void
   deleteConnection(Connection& connection);
 
-  Node&
+  Node*
   createNode(std::unique_ptr<NodeDataModel> && dataModel);
 
   Node&

@@ -72,6 +72,32 @@ canConnect(PortIndex &portIndex, bool& typeConversionNeeded, std::unique_ptr<Nod
     return typeConversionNeeded = (converterModel = _scene->registry().getTypeConverter(candidateNodeDataType.id, connectionDataType.id)) != nullptr;
   }
 
+  if (_connection->getNode(PortType::In))
+  {
+    if (!_node->nodeDataModel()->canConnect(PortType::In,
+                                            _connection->getNode(PortType::In)->nodeDataModel(),
+                                            connectionDataType) ||
+        !_connection->getNode(PortType::In)->nodeDataModel()->canConnect(PortType::Out,
+                                                                         _node->nodeDataModel(),
+                                                                         connectionDataType))
+    {
+      return false;
+    }
+  }
+
+  if (_connection->getNode(PortType::Out))
+  {
+    if (!_node->nodeDataModel()->canConnect(PortType::Out,
+                                            _connection->getNode(PortType::Out)->nodeDataModel(),
+                                            connectionDataType) ||
+        !_connection->getNode(PortType::Out)->nodeDataModel()->canConnect(PortType::In,
+                                                                          _node->nodeDataModel(),
+                                                                          connectionDataType))
+    {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -102,23 +128,27 @@ tryConnect() const
     auto outNodePortIndex = _connection->getPortIndex(connectedPort);
 
     //Creating the converter node
-    Node& converterNode = _scene->createNode(std::move(typeConverterModel));
+    Node* converterNode = _scene->createNode(std::move(typeConverterModel));
+    if (!converterNode)
+    {
+      return false;
+    }
     
     //Calculate and set the converter node's position
-    auto converterNodePos = NodeGeometry::calculateNodePositionBetweenNodePorts(portIndex, requiredPort, _node, outNodePortIndex, connectedPort, outNode, converterNode);
-    converterNode.nodeGraphicsObject().setPos(converterNodePos);
+    auto converterNodePos = NodeGeometry::calculateNodePositionBetweenNodePorts(portIndex, requiredPort, _node, outNodePortIndex, connectedPort, outNode, *converterNode);
+    converterNode->nodeGraphicsObject().setPos(converterNodePos);
 
     //Connecting the converter node to the two nodes trhat originally supposed to be connected.
     //The connection order is different based on if the users connection was started from an input port, or an output port.
     if (requiredPort == PortType::In)
     {
-      _scene->createConnection(converterNode, 0, *outNode, outNodePortIndex);
-      _scene->createConnection(*_node, portIndex, converterNode, 0);
+      _scene->createConnection(QUuid::createUuid(), *converterNode, 0, *outNode, outNodePortIndex);
+      _scene->createConnection(QUuid::createUuid(), *_node, portIndex, *converterNode, 0);
     }
     else
     {
-      _scene->createConnection(converterNode, 0, *_node, portIndex);
-      _scene->createConnection(*outNode, outNodePortIndex, converterNode, 0);
+      _scene->createConnection(QUuid::createUuid(), *converterNode, 0, *_node, portIndex);
+      _scene->createConnection(QUuid::createUuid(), *outNode, outNodePortIndex, *converterNode, 0);
     }
 
     //Delete the users connection, we already replaced it.
@@ -252,6 +282,8 @@ nodePortIsEmpty(PortType portType, PortIndex portIndex) const
 
   if (entries[portIndex].empty()) return true;
 
+  const auto inPolicy = _node->nodeDataModel()->portInConnectionPolicy(portIndex);
   const auto outPolicy = _node->nodeDataModel()->portOutConnectionPolicy(portIndex);
-  return ( portType == PortType::Out && outPolicy == NodeDataModel::ConnectionPolicy::Many);
+  return (portType == PortType::Out && outPolicy == NodeDataModel::ConnectionPolicy::Many) ||
+         (portType == PortType::In && inPolicy == NodeDataModel::ConnectionPolicy::Many);
 }

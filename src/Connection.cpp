@@ -44,11 +44,12 @@ Connection(PortType portType,
 
 
 Connection::
-Connection(Node& nodeIn,
+Connection(QUuid connectionId,
+           Node& nodeIn,
            PortIndex portIndexIn,
            Node& nodeOut,
            PortIndex portIndexOut)
-  : _id(QUuid::createUuid())
+  : _id(connectionId)
   , _outNode(&nodeOut)
   , _inNode(&nodeIn)
   , _outPortIndex(portIndexOut)
@@ -87,6 +88,8 @@ save() const
 
   if (_inNode && _outNode)
   {
+    connectionJson["id"] = _id.toString();
+
     connectionJson["in_id"] = _inNode->id().toString();
     connectionJson["in_index"] = _inPortIndex;
 

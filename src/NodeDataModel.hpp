@@ -84,6 +84,13 @@ public:
 
   virtual
   ConnectionPolicy
+  portInConnectionPolicy(PortIndex) const
+  {
+    return ConnectionPolicy::One;
+  }
+
+  virtual
+  ConnectionPolicy
   portOutConnectionPolicy(PortIndex) const
   {
     return ConnectionPolicy::Many;
@@ -125,6 +132,30 @@ public:
 
   virtual
   NodePainterDelegate* painterDelegate() const { return nullptr; }
+
+public:
+  virtual
+  const void*
+  getData() const
+  {
+    return nullptr;
+  }
+
+  virtual
+  const bool
+  canConnect(PortType portType,
+             NodeDataModel* model,
+             NodeDataType nodeDataType) const
+  {
+    return true;
+  }
+
+  virtual
+  size_t
+  uniqueCount() const
+  {
+    return 0;
+  }
 
 signals:
 

@@ -137,13 +137,13 @@ contextMenuEvent(QContextMenuEvent *event)
 
     if (type)
     {
-      auto& node = _scene->createNode(std::move(type));
-
-      QPoint pos = event->pos();
-
-      QPointF posView = this->mapToScene(pos);
-
-      node.nodeGraphicsObject().setPos(posView);
+      auto* node = _scene->createNode(std::move(type));
+      if (node)
+      {
+        QPoint pos = event->pos();
+        QPointF posView = this->mapToScene(pos);
+        node->nodeGraphicsObject().setPos(posView);
+      }
     }
     else
     {
@@ -233,17 +233,29 @@ void
 FlowView::
 deleteSelectedNodes()
 {
-  // delete the nodes, this will delete many of the connections
-  for (QGraphicsItem * item : _scene->selectedItems())
   {
-    if (auto n = qgraphicsitem_cast<NodeGraphicsObject*>(item))
+    std::vector<NodeGraphicsObject*> NodeGraphicsObjects;
+
+    for (QGraphicsItem * item : _scene->selectedItems())
+    {
+      if (auto n = qgraphicsitem_cast<NodeGraphicsObject*>(item))
+      {
+        NodeGraphicsObjects.push_back(n);
+      }
+    }
+
+    for (auto* n : NodeGraphicsObjects)
+    {
       _scene->removeNode(n->node());
+    }
   }
 
   for (QGraphicsItem * item : _scene->selectedItems())
   {
     if (auto c = qgraphicsitem_cast<ConnectionGraphicsObject*>(item))
+    {
       _scene->deleteConnection(c->connection());
+    }
   }
 }
 

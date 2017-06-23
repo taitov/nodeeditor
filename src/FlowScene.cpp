@@ -75,14 +75,16 @@ createConnection(PortType connectedPort,
 
 std::shared_ptr<Connection>
 FlowScene::
-createConnection(Node& nodeIn,
+createConnection(QUuid connectionId,
+                 Node& nodeIn,
                  PortIndex portIndexIn,
                  Node& nodeOut,
                  PortIndex portIndexOut)
 {
 
   auto connection =
-    std::make_shared<Connection>(nodeIn,
+    std::make_shared<Connection>(connectionId,
+                                 nodeIn,
                                  portIndexIn,
                                  nodeOut,
                                  portIndexOut);
@@ -110,6 +112,10 @@ std::shared_ptr<Connection>
 FlowScene::
 restoreConnection(QJsonObject const &connectionJson)
 {
+  QUuid connectionId = QUuid::createUuid();
+  if (connectionJson.find("id") != connectionJson.end())
+    connectionId = QUuid(connectionJson["id"].toString());
+
   QUuid nodeInId  = QUuid(connectionJson["in_id"].toString());
   QUuid nodeOutId = QUuid(connectionJson["out_id"].toString());
 
@@ -119,7 +125,7 @@ restoreConnection(QJsonObject const &connectionJson)
   auto nodeIn  = _nodes[nodeInId].get();
   auto nodeOut = _nodes[nodeOutId].get();
 
-  return createConnection(*nodeIn, portIndexIn, *nodeOut, portIndexOut);
+  return createConnection(connectionId, *nodeIn, portIndexIn, *nodeOut, portIndexOut);
 }
 
 
@@ -133,10 +139,26 @@ deleteConnection(Connection& connection)
 }
 
 
-Node&
+Node*
 FlowScene::
 createNode(std::unique_ptr<NodeDataModel> && dataModel)
 {
+  if (dataModel->uniqueCount())
+  {
+    size_t count = 0;
+    for (const auto& iter : nodes())
+    {
+      if (iter.second->nodeDataModel()->name() == dataModel->name())
+      {
+        count++;
+      }
+    }
+    if (count >= dataModel->uniqueCount())
+    {
+      return nullptr;
+    }
+  }
+
   auto node = std::make_unique<Node>(std::move(dataModel));
   auto ngo  = std::make_unique<NodeGraphicsObject>(*this, *node);
 
@@ -146,7 +168,7 @@ createNode(std::unique_ptr<NodeDataModel> && dataModel)
   _nodes[node->id()] = std::move(node);
 
   nodeCreated(*nodePtr);
-  return *nodePtr;
+  return nodePtr;
 }
 
 
@@ -461,27 +483,39 @@ saveToMemory() const
   QJsonObject sceneJson;
 
   QJsonArray nodesJsonArray;
-
-  for (auto const & pair : _nodes)
   {
-    auto const &node = pair.second;
+    std::map<QUuid, Node*> nodes;
+    for (auto const & pair : _nodes)
+    {
+      nodes[pair.first] = pair.second.get();
+    }
 
-    nodesJsonArray.append(node->save());
+    for (auto const & pair : nodes)
+    {
+      auto const &node = pair.second;
+
+      nodesJsonArray.append(node->save());
+    }
   }
-
   sceneJson["nodes"] = nodesJsonArray;
 
   QJsonArray connectionJsonArray;
-  for (auto const & pair : _connections)
   {
-    auto const &connection = pair.second;
+    std::map<QUuid, Connection*> connections;
+    for (auto const & pair : _connections)
+    {
+      connections[pair.first] = pair.second.get();
+    }
+    for (auto const & pair : connections)
+    {
+      auto const &connection = pair.second;
 
-    QJsonObject connectionJson = connection->save();
+      QJsonObject connectionJson = connection->save();
 
-    if (!connectionJson.isEmpty())
-      connectionJsonArray.append(connectionJson);
+      if (!connectionJson.isEmpty())
+        connectionJsonArray.append(connectionJson);
+    }
   }
-
   sceneJson["connections"] = connectionJsonArray;
 
   QJsonDocument document(sceneJson);

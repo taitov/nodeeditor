@@ -53,7 +53,8 @@ public:
              Node& node,
              PortIndex portIndex);
 
-  Connection(Node& nodeIn,
+  Connection(QUuid connectionId,
+             Node& nodeIn,
              PortIndex portIndexIn,
              Node& nodeOut,
              PortIndex portIndexOut);

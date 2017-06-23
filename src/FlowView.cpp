@@ -313,8 +313,8 @@ drawBackground(QPainter* painter, const QRectF& r)
       // horizontal lines
       for (int yi = int(bottom); yi <= int(top); ++yi)
       {
-        QLineF line(left * gridStep, yi * gridStep,
-                    right * gridStep, yi * gridStep );
+        QLineF line(left * gridStep, yi * gridStep - 1,
+                    right * gridStep, yi * gridStep - 1);
         painter->drawLine(line);
       }
     };
@@ -326,12 +326,12 @@ drawBackground(QPainter* painter, const QRectF& r)
   QPen pfine(flowViewStyle.FineGridColor, 1.0);
 
   painter->setPen(pfine);
-  drawGrid(15);
+  drawGrid(19);
 
   QPen p(flowViewStyle.CoarseGridColor, 1.0);
 
   painter->setPen(p);
-  drawGrid(150);
+  drawGrid(190);
 }
 
 

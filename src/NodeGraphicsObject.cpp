@@ -185,6 +185,18 @@ itemChange(GraphicsItemChange change, const QVariant &value)
   if (change == ItemPositionChange && scene())
   {
     moveConnections();
+    QPointF newPos = value.toPointF();
+    if(QApplication::mouseButtons() == Qt::LeftButton)
+    {
+      int gridSize = 19;
+      qreal xV = round(newPos.x() / gridSize) * gridSize;
+      qreal yV = round(newPos.y() / gridSize) * gridSize;
+      return QPointF(xV, yV);
+    }
+    else
+    {
+      return newPos;
+    }
   }
 
   return QGraphicsItem::itemChange(change, value);

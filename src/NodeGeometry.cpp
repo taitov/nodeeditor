@@ -105,6 +105,13 @@ recalculateSize() const
     _width   = std::max(_width, validationWidth());
     _height += validationHeight() + _spacing;
   }
+
+  unsigned int gridSize = 19;
+
+  _width /= gridSize;
+  _width = (_width + 1) * gridSize;
+  _height /= gridSize;
+  _height = (_height + 1) * gridSize;
 }
 
 

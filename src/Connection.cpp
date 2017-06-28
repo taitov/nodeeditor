@@ -92,9 +92,13 @@ save() const
 
     connectionJson["in_id"] = _inNode->id().toString();
     connectionJson["in_index"] = _inPortIndex;
+    connectionJson["in_portName"] = _inNode->nodeDataModel()->dataType(PortType::In, _inPortIndex).name;
+    connectionJson["in_portType"] = _inNode->nodeDataModel()->dataType(PortType::In, _inPortIndex).id;
 
     connectionJson["out_id"] = _outNode->id().toString();
     connectionJson["out_index"] = _outPortIndex;
+    connectionJson["out_portName"] = _outNode->nodeDataModel()->dataType(PortType::Out, _outPortIndex).name;
+    connectionJson["out_portType"] = _outNode->nodeDataModel()->dataType(PortType::Out, _outPortIndex).id;
   }
 
   return connectionJson;

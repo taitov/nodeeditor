@@ -1,6 +1,6 @@
-#include <tfvm/gui.h>
-#include <tfvm/library/base.h>
-#include <tfvm/library/console.h>
+#include <tvm/gui.h>
+#include <tvm/library/base.h>
+#include <tvm/library/console.h>
 
 using namespace nVirtualMachine;
 

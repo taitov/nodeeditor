@@ -1,4 +1,4 @@
-#include <tfvm/gui.h>
+#include <tvm/gui.h>
 
 #include "example.h"
 

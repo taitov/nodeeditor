@@ -1,8 +1,8 @@
-#include <tfvm/gui.h>
-#include <tfvm/library/base.h>
-#include <tfvm/library/console.h>
-#include <tfvm/library/timer.h>
-#include <tfvm/library/rawsocket.h>
+#include <tvm/gui.h>
+#include <tvm/library/base.h>
+#include <tvm/library/console.h>
+#include <tvm/library/timer.h>
+#include <tvm/library/rawsocket.h>
 
 #include "virtualmachine.h"
 

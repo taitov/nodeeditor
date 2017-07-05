@@ -58,13 +58,6 @@ NodeGraphicsObject(FlowScene &scene,
   setZValue(0);
 
   embedQWidget();
-
-  // connect to the move signals to emit the move signals in FlowScene
-  auto onMoveSlot = [this] {
-    _scene.nodeMoved(_node, pos());
-  };
-  connect(this, &QGraphicsObject::xChanged, this, onMoveSlot);
-  connect(this, &QGraphicsObject::yChanged, this, onMoveSlot);
 }
 
 
@@ -344,6 +337,8 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
   // position connections precisely after fast node move
   moveConnections();
+
+  _scene.nodeMoved(_node, pos());
 }
 
 

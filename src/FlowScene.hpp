@@ -56,13 +56,22 @@ public:
   deleteConnection(Connection& connection);
 
   Node*
-  createNode(std::unique_ptr<NodeDataModel> && dataModel);
+  createNode(std::unique_ptr<NodeDataModel> && dataModel,
+             const QPointF& position,
+             bool doSignal = true);
+
+  Node*
+  createNode(std::unique_ptr<NodeDataModel> && dataModel,
+             const QUuid& id,
+             const QPointF& position,
+             bool doSignal = true);
 
   Node&
   restoreNode(QJsonObject const& nodeJson);
 
   void
-  removeNode(Node& node);
+  removeNode(Node& node,
+             bool doSignal = true);
 
   DataModelRegistry&
   registry() const;

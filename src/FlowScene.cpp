@@ -141,7 +141,10 @@ deleteConnection(Connection& connection)
 
 Node*
 FlowScene::
-createNode(std::unique_ptr<NodeDataModel> && dataModel)
+createNode(std::unique_ptr<NodeDataModel> && dataModel,
+           const QUuid& id,
+           const QPointF& position,
+           bool doSignal)
 {
   if (dataModel->uniqueCount())
   {
@@ -159,18 +162,33 @@ createNode(std::unique_ptr<NodeDataModel> && dataModel)
     }
   }
 
-  auto node = std::make_unique<Node>(std::move(dataModel));
+  auto node = std::make_unique<Node>(std::move(dataModel), id);
   auto ngo  = std::make_unique<NodeGraphicsObject>(*this, *node);
+  ngo->setPos(position);
 
   node->setGraphicsObject(std::move(ngo));
 
   auto nodePtr = node.get();
   _nodes[node->id()] = std::move(node);
 
-  nodeCreated(*nodePtr);
+  if (doSignal)
+  {
+    nodeCreated(*nodePtr);
+  }
   return nodePtr;
 }
 
+Node*
+FlowScene::
+createNode(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel,
+           const QPointF& position,
+           bool doSignal)
+{
+  createNode(std::move(dataModel),
+             QUuid::createUuid(),
+             position,
+             doSignal);
+}
 
 Node&
 FlowScene::
@@ -200,10 +218,13 @@ restoreNode(QJsonObject const& nodeJson)
 
 void
 FlowScene::
-removeNode(Node& node)
+removeNode(Node& node, bool doSignal)
 {
   // call signal
-  nodeDeleted(node);
+  if (doSignal)
+  {
+    nodeDeleted(node);
+  }
 
   auto deleteConnections =
     [&node, this] (PortType portType)

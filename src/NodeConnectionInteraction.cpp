@@ -115,47 +115,6 @@ tryConnect() const
   {
     return false;
   }
-  
-  /// 1.5) If the connection is possible but a type conversion is needed, add a converter node to the scene, and connect it properly
-  if (typeConversionNeeded)
-  {
-    //Determining port types
-    PortType requiredPort = connectionRequiredPort();
-    PortType connectedPort = requiredPort == PortType::Out ? PortType::In : PortType::Out;
-
-    //Get the node and port from where the connection starts
-    auto outNode = _connection->getNode(connectedPort);
-    auto outNodePortIndex = _connection->getPortIndex(connectedPort);
-
-    //Creating the converter node
-    Node* converterNode = _scene->createNode(std::move(typeConverterModel));
-    if (!converterNode)
-    {
-      return false;
-    }
-    
-    //Calculate and set the converter node's position
-    auto converterNodePos = NodeGeometry::calculateNodePositionBetweenNodePorts(portIndex, requiredPort, _node, outNodePortIndex, connectedPort, outNode, *converterNode);
-    converterNode->nodeGraphicsObject().setPos(converterNodePos);
-
-    //Connecting the converter node to the two nodes trhat originally supposed to be connected.
-    //The connection order is different based on if the users connection was started from an input port, or an output port.
-    if (requiredPort == PortType::In)
-    {
-      _scene->createConnection(QUuid::createUuid(), *converterNode, 0, *outNode, outNodePortIndex);
-      _scene->createConnection(QUuid::createUuid(), *_node, portIndex, *converterNode, 0);
-    }
-    else
-    {
-      _scene->createConnection(QUuid::createUuid(), *converterNode, 0, *_node, portIndex);
-      _scene->createConnection(QUuid::createUuid(), *outNode, outNodePortIndex, *converterNode, 0);
-    }
-
-    //Delete the users connection, we already replaced it.
-    _scene->deleteConnection(*_connection);
-
-    return true;
-  }
 
   // 2) Assign node to required port in Connection
 

@@ -37,6 +37,22 @@ Node(std::unique_ptr<NodeDataModel> && dataModel)
           this, &Node::onDataUpdated);
 }
 
+Node::
+Node(std::unique_ptr<NodeDataModel> && dataModel,
+     const QUuid& id) :
+  _id(id)
+  , _nodeDataModel(std::move(dataModel))
+  , _nodeState(_nodeDataModel)
+  , _nodeGeometry(_nodeDataModel)
+  , _nodeGraphicsObject(nullptr)
+{
+  _nodeGeometry.recalculateSize();
+
+  // propagate data: model => node
+  connect(_nodeDataModel.get(), &NodeDataModel::dataUpdated,
+          this, &Node::onDataUpdated);
+}
+
 
 Node::
 ~Node()

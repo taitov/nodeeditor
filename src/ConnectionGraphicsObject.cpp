@@ -160,6 +160,13 @@ void
 ConnectionGraphicsObject::
 mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
+  if (event->button() == Qt::BackButton ||
+      event->button() == Qt::ForwardButton)
+  {
+    event->ignore();
+    return;
+  }
+
   QGraphicsItem::mousePressEvent(event);
   //event->ignore();
 }

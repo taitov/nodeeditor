@@ -200,6 +200,13 @@ void
 NodeGraphicsObject::
 mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
+  if (event->button() == Qt::BackButton ||
+      event->button() == Qt::ForwardButton)
+  {
+    event->ignore();
+    return;
+  }
+
   if(_locked) return;
 
   // deselect all other items after this one is selected
@@ -402,6 +409,13 @@ void
 NodeGraphicsObject::
 mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
+  if (event->button() == Qt::BackButton ||
+      event->button() == Qt::ForwardButton)
+  {
+    event->ignore();
+    return;
+  }
+
   QGraphicsItem::mouseDoubleClickEvent(event);
 
   _scene.nodeDoubleClicked(node());
